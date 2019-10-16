@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -eu
+
+if [ "$#" -eq 4 ]; then
+    export SERVICE=$1
+    export HTTP_HOST=$2
+    export HTTP_PORT=$3
+    export HTTPS_PORT=$4
+else
+    echo "Usage: <service> <hostname> <port-http> <port-https>"
+    echo "e.g. docker run ... container:8888 example.com 80 443"
+    exit 1
+fi
+
+echo "We will listen on ports $HTTP_PORT (http) and $HTTPS_PORT (https)"
+echo "with hostname $HTTP_HOST, proxying the service http://$SERVICE"
+
+envsubst '$HTTP_HOST,$HTTP_PORT,$HTTPS_PORT,$SERVICE' \
+         < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+
+# These paths must match the paths as used in the nginx.conf
+PATH_CONFIG=/run/proxy
+PATH_CERT="$PATH_CONFIG/certificate.pem"
+PATH_KEY="$PATH_CONFIG/key.pem"
+PATH_DHPARAM="$PATH_CONFIG/dhparam.pem"
+
+mkdir -p $PATH_CONFIG
+
+# We'll copy this one directly into place - if the user wants to
+# override it they should just copy theirs in place before the
+# certificate.
+cp /usr/local/share/ssl/dhparam.pem $PATH_DHPARAM
+
+# Wait for the ssl certificates to be copied in or generated
+echo "Waiting for certificates at $PATH_CERT and $PATH_KEY"
+while [ ! -e $PATH_CERT ] || [ ! -e $PATH_KEY ]; do
+  sleep 1
+done
+
+echo "Certificate files detected. Running nginx"
+exec nginx -g "daemon off;"
