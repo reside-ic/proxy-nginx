@@ -1,4 +1,3 @@
 language: minimal
 script:
-  - ./scripts/build
-  - ./scripts/push
+  - ./scripts/travis
