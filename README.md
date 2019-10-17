@@ -1,5 +1,7 @@
 ## Dockerised reverse proxy
 
+[![Build Status](https://travis-ci.com/reside-ic/proxy-nginx.svg?branch=master)](https://travis-ci.com/reside-ic/proxy-nginx)
+
 This repository contains a support for running a `nginx` proxy in a docker container in order to secure a web application.  It makes a number of assumptions:
 
 * You want to secure the app with TLS and redirect all http traffic to https
