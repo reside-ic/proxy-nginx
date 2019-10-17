@@ -6,3 +6,9 @@ HERE=$(dirname $0)
 
 docker push $APP_DOCKER_BRANCH_TAG
 docker push $APP_DOCKER_COMMIT_TAG
+
+if [ $GIT_BRANCH == "master" ]; then
+    APP_DOCKER_LATEST_TAG=$REGISTRY/$NAME:latest
+    docker tag $TAG_BRANCH $APP_DOCKER_LATEST_TAG
+    docker push $APP_DOCKER_LATEST_TAG
+fi
