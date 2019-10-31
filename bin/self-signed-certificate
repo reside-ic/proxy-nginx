@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-if [ "$#" -eq 1 ]; then
-    DEST="$1"
-    cp /usr/local/share/ssl/key.pem $DEST
-    cp /usr/local/share/ssl/certificate.pem $DEST
-    exit 0
-elif [ "$#" -eq 6 ]; then
+if [ "$#" -eq 6 ]; then
     DEST="$1"
     COUNTRY="$2"
     LOCATION="$3"
@@ -15,7 +10,6 @@ elif [ "$#" -eq 6 ]; then
     COMMON="$6"
 else
     echo "Usage:"
-    echo "  self-signed-certificate DEST"
     echo "  self-signed-certificate DEST COUNTRY LOCATION ORG ORG_UNIT COMMON"
     exit 1
 fi
