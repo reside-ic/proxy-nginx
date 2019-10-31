@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+GIT_ID=$(git rev-parse --short=7 HEAD)
+if [ ! -z "$TRAVIS_PULL_REQUEST_BRANCH" ]; then
+    GIT_BRANCH="$TRAVIS_PULL_REQUEST_BRANCH"
+elif [ ! -z "$TRAVIS_BRANCH" ]; then
+    GIT_BRANCH="$TRAVIS_BRANCH"
+else
+    GIT_BRANCH=$(git symbolic-ref --short HEAD)
+fi
+
+REGISTRY=reside
+NAME=proxy-nginx
+
+APP_DOCKER_COMMIT_TAG=$REGISTRY/$NAME:$GIT_ID
+APP_DOCKER_BRANCH_TAG=$REGISTRY/$NAME:$GIT_BRANCH
