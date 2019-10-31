@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eu
 
+# This first usage is odd, but used as suggested in the README to copy
+# the pregenerated certificates into the container
 if [ "$#" -eq 1 ]; then
     DEST="$1"
     cp /usr/local/share/ssl/key.pem $DEST
