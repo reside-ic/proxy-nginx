@@ -73,6 +73,8 @@ vault write /secret/domain/ssl \
   key=@import/domain.key cert=@import/concatenated.crt
 ```
 
+(though the exact schema will depend on the application).
+
 During deployment you will need to read these keys from the vault and inject them into the container.
 
 ### Usage
