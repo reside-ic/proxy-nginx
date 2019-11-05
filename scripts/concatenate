@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -eu
+
+if [ $# -ne 2 ]; then
+    echo "Usage:"
+    echo "  ./scripts/concatenate <cert> <dest>"
+    exit 1
+fi
+
+CERT=$1
+DEST=$2
+EXTRA=$(dirname $1)/RootCertificates
+CERT_INT="$EXTRA/QuoVadisOVIntermediateCertificate.crt"
+CERT_ROOT="$EXTRA/QuoVadisOVRootCertificate.crt"
+
+if [ ! -f "$CERT" ]; then
+    echo "Did not find certificate at $CERT"
+    exit 1
+fi
+
+if [ ! -f "$CERT_INT" ]; then
+    echo "Did not find root certificate at $CERT_INT"
+    exit 1
+fi
+
+if [ ! -f "$CERT_ROOT" ]; then
+    echo "Did not find root certificate at $CERT_ROOT"
+    exit 1
+fi
+
+mkdir -p $(dirname $DEST)
+cat "$CERT" "$CERT_INT" "$CERT_ROOT" > "$DEST"
+echo "Wrote concatenated certificate as $DEST"
