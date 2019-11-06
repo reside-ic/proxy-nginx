@@ -45,7 +45,27 @@ from this directory, commit the result to git and rebuild the containers.  This 
 
 ### Getting a certificate from ICT
 
-First, generate a csr and log a ticket with ICT
+First, generate a key, use it to generate a csr and then log a ticket with ICT, sending them the csr.
+  - openssl genrsa -out my_site.key 2048
+  - openssl req -new -key my_site.key -out my_site.csr -config path/to/openssl.cnf
+
+The information ICT like in the CSR is like this:
+  - Country Name: GB
+  - State or Province: London
+  - Locality Name: London
+  - Organization Name: Imperial College of Science, Technology and Medicine
+  - Organizational Unit Name: Department of Infectious Disease Epidemiology
+  - Common Name: site_name.dide.ic.ac.uk
+  - Email Address: [BLANK]
+  - Challenge Password: a_password
+  - Optional company name: [BLANK]
+  
+Then on the [Imperial ASK](https://imperial.service-now.com/ask) site:
+  - Log in with IC credentials.
+  - Choose *Make a Request* and then *Security Certificate Request*.
+  - Request a *Production* certificate for external use. Provide other details, and the CSR text.
+  - Check your email, or revisit the ticket for updates. 
+  - If there is a mention of an attachment that you can't see, ring 49000 and ICT helpdesk will review visibility.
 
 ICT will email back a set of 3 certificates in a zip;
 
