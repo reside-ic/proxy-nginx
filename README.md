@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/reside-ic/proxy-nginx.svg?branch=master)](https://travis-ci.com/reside-ic/proxy-nginx)
 
-This repository contains a support for running a `nginx` proxy in a docker container in order to secure a web application.  It makes a number of assumptions:
+This repository contains support for running a `nginx` proxy in a docker container in order to secure a web application.  It makes a number of assumptions:
 
 * You want to secure the app with TLS and redirect all http traffic to https
 * You have a single service container to proxy and it is speaking http
@@ -104,7 +104,7 @@ docker cp ssl/certificate.pem proxy:/run/proxy/certificate.pem
 docker cp ssl/key.pem proxy:/run/proxy/key.pem
 ```
 
-The `service` here is the name and port of the http server being proxied (e.g., `myapp:8080`, as found on the network `yournetwork` (if using host networking, this could be `localhost:8080` but then you may also be exposing your http service to the wider network, which is probably undesirable).  If your service uses port `80` you may omit the port.
+The `service` here is the name and port of the http server being proxied (e.g., `myapp:8080`), as found on the network `yournetwork` (if using host networking, this could be `localhost:8080` but then you may also be exposing your http service to the wider network, which is probably undesirable).  If your service uses port `80` you may omit the port.
 
 ## License
 
