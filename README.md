@@ -89,11 +89,10 @@ vault login -method=github
 Then write into the vault as:
 
 ```
-vault write /secret/domain/ssl \
-  key=@import/domain.key cert=@import/concatenated.crt
+vault write /secret/domain/ssl key=@my_site.key cert=@import/concatenated.crt
 ```
 
-(though the exact schema will depend on the application).
+(though the exact schema will depend on the application).  Note that this uses the private key used in the first stage.
 
 During deployment you will need to read these keys from the vault and inject them into the container.
 
