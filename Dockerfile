@@ -1,4 +1,4 @@
-FROM nginx:1.15
+FROM nginx:1.19
 
 # Only used for generating self-signed certificates
 RUN apt-get update && apt-get install -y openssl
