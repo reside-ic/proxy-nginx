@@ -4,11 +4,13 @@ set -e
 HERE=$(dirname $0)
 . $HERE/common
 
-docker push $APP_DOCKER_BRANCH_TAG
-docker push $APP_DOCKER_COMMIT_TAG
+# In case we switch agents between steps
+[ ! -z $(docker images -q $TAG_SHA) ] || docker pull $TAG_SHA
+
+docker tag $TAG_SHA $TAG_BRANCH
+docker push $TAG_BRANCH
 
 if [ $GIT_BRANCH == "master" ]; then
-    APP_DOCKER_LATEST_TAG=$REGISTRY/$NAME:latest
-    docker tag $APP_DOCKER_COMMIT_TAG $APP_DOCKER_LATEST_TAG
-    docker push $APP_DOCKER_LATEST_TAG
+   docker tag $TAG_SHA $TAG_LATEST
+   docker push $TAG_LATEST
 fi
