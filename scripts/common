@@ -2,8 +2,8 @@
 set -e
 
 PACKAGE_ROOT=$(realpath $HERE/..)
-PACKAGE_NAME=orderly-web-proxy
-PACKAGE_ORG=vimc
+PACKAGE_NAME=proxy-nginx
+PACKAGE_ORG=reside
 
 # Buildkite doesn't check out a full history from the remote (just the
 # single commit) so you end up with a detached head and git rev-parse
