@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-set -e
+set -ex
 
 HERE=$(dirname $0)
 . $HERE/common
 
-docker build \
-       --tag $APP_DOCKER_COMMIT_TAG \
-       --tag $APP_DOCKER_BRANCH_TAG \
-       $HERE/..
+docker build --pull \
+       --tag $TAG_SHA \
+       -f proxy/Dockerfile \
+       proxy
+
+# We always push the SHA tagged versions, for debugging if the tests
+# after this step fail
+docker push $TAG_SHA

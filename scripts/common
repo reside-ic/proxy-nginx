@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
 set -e
 
-GIT_ID=$(git rev-parse --short=7 HEAD)
-if [ ! -z "$TRAVIS_PULL_REQUEST_BRANCH" ]; then
-    GIT_BRANCH="$TRAVIS_PULL_REQUEST_BRANCH"
-elif [ ! -z "$TRAVIS_BRANCH" ]; then
-    GIT_BRANCH="$TRAVIS_BRANCH"
+PACKAGE_ROOT=$(realpath $HERE/..)
+PACKAGE_NAME=orderly-web-proxy
+PACKAGE_ORG=vimc
+
+# Buildkite doesn't check out a full history from the remote (just the
+# single commit) so you end up with a detached head and git rev-parse
+# doesn't work
+if [ "$BUILDKITE" = "true" ]; then
+    GIT_SHA=${BUILDKITE_COMMIT:0:7}
 else
-    GIT_BRANCH=$(git symbolic-ref --short HEAD)
+    GIT_SHA=$(git -C "$PACKAGE_ROOT" rev-parse --short=7 HEAD)
 fi
 
-REGISTRY=reside
-NAME=proxy-nginx
+if [ "$BUILDKITE" = "true" ]; then
+    GIT_BRANCH=$BUILDKITE_BRANCH
+else
+    GIT_BRANCH=$(git -C "$PACKAGE_ROOT" symbolic-ref --short HEAD)
+fi
 
-APP_DOCKER_COMMIT_TAG=$REGISTRY/$NAME:$GIT_ID
-APP_DOCKER_BRANCH_TAG=$REGISTRY/$NAME:$GIT_BRANCH
+TAG_SHA="${PACKAGE_ORG}/${PACKAGE_NAME}:${GIT_SHA}"
+TAG_BRANCH="${PACKAGE_ORG}/${PACKAGE_NAME}:${GIT_BRANCH}"
+TAG_LATEST="${PACKAGE_ORG}/${PACKAGE_NAME}:latest"
