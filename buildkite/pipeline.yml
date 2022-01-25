@@ -1,8 +1,8 @@
 steps:
   - label: ":whale::rstats: Build"
-    command: proxy/build
+    command: scripts/build
 
   - wait
 
   - label: ":shipit: Push images"
-    command: proxy/push
+    command: scripts/push
