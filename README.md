@@ -108,40 +108,16 @@ The `service` here is the name and port of the http server being proxied (e.g., 
 
 ### Building and publishing
 
-GitHub Actions builds and smoke-tests the image on pull requests and branch pushes,
-or when manually triggered. Pull requests never publish or receive registry
-credentials. Successful branch builds publish the tested image to
-`ghcr.io/reside-ic/proxy-nginx` using `GITHUB_TOKEN`; no Docker Hub credentials are
-needed. The build job has read-only repository access, and only the publishing
-job has `packages: write`.
+GitHub Actions builds pull requests without publishing. Branch pushes and manual
+branch runs publish to `ghcr.io/reside-ic/proxy-nginx` using `GITHUB_TOKEN`, with
+seven-character SHA and Docker-normalized branch tags. Only `master` publishes
+`latest`; a branch named `latest` uses `branch-latest`.
 
-Images have a seven-character commit SHA tag and a branch tag. Branch tags replace
-characters other than letters, digits, `_`, `.`, and `-` with `-`, replace a
-leading `.` or `-` with `_`, and are limited to 128 characters. The reserved branch
-names `latest` and seven-character hexadecimal names get a `branch-` prefix.
-Avoid branch names that normalize to the same tag. Only `master` updates `latest`.
-Publishing is serialized per branch; if the branch has moved before publishing,
-only the commit tag is pushed. Tag pushes do not trigger builds.
+Build locally with `docker build --pull -t proxy-nginx .`.
 
-To build and test locally with Docker and curl installed:
-
-```
-./scripts/build
-./scripts/test
-```
-
-Neither command publishes. To publish manually, first authenticate with
-`docker login ghcr.io`, then run `./scripts/push`. On a detached checkout, provide
-`GIT_BRANCH` explicitly; `GIT_SHA` can also be supplied to select an existing image.
-
-For the CI cutover, disable the external Buildkite pipeline before enabling Actions
-publishing, and replace any required Buildkite status checks with the Actions
-`build` check. Ensure organization policy permits Actions and GHCR publishing.
-After the first push, make the GHCR package public for anonymous pulls (new
-packages default to private), or configure consumers with package-read credentials.
-An existing package must grant this repository Actions access. Update downstream
-image references from `reside/proxy-nginx` to `ghcr.io/reside-ic/proxy-nginx`;
-existing Docker Hub images are not removed by this migration.
+At cutover, disable the external Buildkite pipeline and replace its required
+checks with the Actions `build` check. Make the GHCR package public for anonymous
+pulls, or configure consumer authentication, and update downstream image references.
 
 ## License
 
