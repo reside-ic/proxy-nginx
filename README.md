@@ -1,6 +1,6 @@
 ## Dockerised reverse proxy
 
-[![Build Status](https://travis-ci.com/reside-ic/proxy-nginx.svg?branch=master)](https://travis-ci.com/reside-ic/proxy-nginx)
+[![Build](https://github.com/reside-ic/proxy-nginx/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/reside-ic/proxy-nginx/actions/workflows/build.yml)
 
 This repository contains support for running a `nginx` proxy in a docker container in order to secure a web application.  It makes a number of assumptions:
 
@@ -99,12 +99,49 @@ During deployment you will need to read these keys from the vault and inject the
 ### Usage
 
 ```
-docker run --name proxy --network yournetwork reside/proxy-nginx:reside-53 service example.com 80 443
+docker run --name proxy --network yournetwork ghcr.io/reside-ic/proxy-nginx:latest service example.com 80 443
 docker cp ssl/certificate.pem proxy:/run/proxy/certificate.pem
 docker cp ssl/key.pem proxy:/run/proxy/key.pem
 ```
 
 The `service` here is the name and port of the http server being proxied (e.g., `myapp:8080`), as found on the network `yournetwork` (if using host networking, this could be `localhost:8080` but then you may also be exposing your http service to the wider network, which is probably undesirable).  If your service uses port `80` you may omit the port.
+
+### Building and publishing
+
+GitHub Actions builds and smoke-tests the image on pull requests and branch pushes,
+or when manually triggered. Pull requests never publish or receive registry
+credentials. Successful branch builds publish the tested image to
+`ghcr.io/reside-ic/proxy-nginx` using `GITHUB_TOKEN`; no Docker Hub credentials are
+needed. The build job has read-only repository access, and only the publishing
+job has `packages: write`.
+
+Images have a seven-character commit SHA tag and a branch tag. Branch tags replace
+characters other than letters, digits, `_`, `.`, and `-` with `-`, replace a
+leading `.` or `-` with `_`, and are limited to 128 characters. The reserved branch
+names `latest` and seven-character hexadecimal names get a `branch-` prefix.
+Avoid branch names that normalize to the same tag. Only `master` updates `latest`.
+Publishing is serialized per branch; if the branch has moved before publishing,
+only the commit tag is pushed. Tag pushes do not trigger builds.
+
+To build and test locally with Docker and curl installed:
+
+```
+./scripts/build
+./scripts/test
+```
+
+Neither command publishes. To publish manually, first authenticate with
+`docker login ghcr.io`, then run `./scripts/push`. On a detached checkout, provide
+`GIT_BRANCH` explicitly; `GIT_SHA` can also be supplied to select an existing image.
+
+For the CI cutover, disable the external Buildkite pipeline before enabling Actions
+publishing, and replace any required Buildkite status checks with the Actions
+`build` check. Ensure organization policy permits Actions and GHCR publishing.
+After the first push, make the GHCR package public for anonymous pulls (new
+packages default to private), or configure consumers with package-read credentials.
+An existing package must grant this repository Actions access. Update downstream
+image references from `reside/proxy-nginx` to `ghcr.io/reside-ic/proxy-nginx`;
+existing Docker Hub images are not removed by this migration.
 
 ## License
 

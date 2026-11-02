@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
-set -e
+set -eu
 
-HERE=$(dirname $0)
-. $HERE/common
+if [ "$#" -gt 1 ] || { [ "$#" -eq 1 ] && [ "$1" != "--sha-only" ]; }; then
+    echo "Usage: $0 [--sha-only]" >&2
+    exit 1
+fi
 
-# In case we switch agents between steps
-[ ! -z $(docker images -q $TAG_SHA) ] || docker pull $TAG_SHA
+HERE=$(dirname "$0")
+. "$HERE/common"
 
-docker tag $TAG_SHA $TAG_BRANCH
-docker push $TAG_BRANCH
+docker push "$TAG_SHA"
 
-if [ $GIT_BRANCH == "master" ]; then
-   docker tag $TAG_SHA $TAG_LATEST
-   docker push $TAG_LATEST
+if [ "${1:-}" = "--sha-only" ]; then
+    exit 0
+fi
+
+docker tag "$TAG_SHA" "$TAG_BRANCH"
+docker push "$TAG_BRANCH"
+
+if [ "$GIT_BRANCH" = "master" ]; then
+   docker tag "$TAG_SHA" "$TAG_LATEST"
+   docker push "$TAG_LATEST"
 fi

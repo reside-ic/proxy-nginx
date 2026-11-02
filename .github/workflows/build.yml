@@ -1,0 +1,88 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GIT_SHA: ${{ github.sha }}
+  GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Build image
+        run: scripts/build
+      - name: Smoke test
+        run: scripts/test
+      - name: Export image
+        if: github.event_name != 'pull_request' && github.ref_type == 'branch' && github.repository == 'reside-ic/proxy-nginx'
+        run: |
+          HERE=scripts
+          . scripts/common
+          docker save "$TAG_SHA" | gzip > "$RUNNER_TEMP/image.tar.gz"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: github.event_name != 'pull_request' && github.ref_type == 'branch' && github.repository == 'reside-ic/proxy-nginx'
+        with:
+          name: image
+          path: ${{ runner.temp }}/image.tar.gz
+          retention-days: 1
+          compression-level: 0
+
+  publish:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref_type == 'branch' && github.repository == 'reside-ic/proxy-nginx'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: image
+          path: ${{ runner.temp }}
+      - name: Load image
+        run: docker load --input "$RUNNER_TEMP/image.tar.gz"
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+      - name: Publish image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Do not let a queued or manually rerun old commit replace moving tags.
+          head_sha=$(gh api --method GET "repos/$GITHUB_REPOSITORY/commits" \
+            -f sha="$GITHUB_REF" -f per_page=1 --jq '.[0].sha')
+          if [ "$head_sha" != "$GITHUB_SHA" ]; then
+            echo "Branch has moved; publishing only the commit tag."
+            scripts/push --sha-only
+          else
+            scripts/push
+          fi
+      - name: Log out of GHCR
+        if: always()
+        run: docker logout ghcr.io
