@@ -106,17 +106,11 @@ The `service` here is the name and port of the http server being proxied (e.g., 
 
 ### Building and publishing
 
-GitHub Actions builds and publishes every branch push to
-`ghcr.io/reside-ic/proxy-nginx` using `GITHUB_TOKEN`, with
+GitHub Actions builds and publishes every branch push to `ghcr.io/reside-ic/proxy-nginx`, with
 seven-character SHA and Docker-normalized branch tags. Only `master` publishes
-`latest`; a branch named `latest` uses `branch-latest`.
+`latest`.
 
-Build locally with `docker build --pull -t proxy-nginx .`.
-
-At cutover, disable the external Buildkite pipeline and replace its required
-checks with the Actions `build` check. Make the GHCR package public for anonymous
-pulls, or configure consumer authentication, and update downstream image references.
-
+Build locally with `docker build --pull -t my-local-build .`.
 ## License
 
 MIT © Imperial College of Science, Technology and Medicine
