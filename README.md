@@ -1,7 +1,5 @@
 ## Dockerised reverse proxy
 
-[![Build Status](https://travis-ci.com/reside-ic/proxy-nginx.svg?branch=master)](https://travis-ci.com/reside-ic/proxy-nginx)
-
 This repository contains support for running a `nginx` proxy in a docker container in order to secure a web application.  It makes a number of assumptions:
 
 * You want to secure the app with TLS and redirect all http traffic to https
@@ -99,13 +97,20 @@ During deployment you will need to read these keys from the vault and inject the
 ### Usage
 
 ```
-docker run --name proxy --network yournetwork reside/proxy-nginx:reside-53 service example.com 80 443
+docker run --name proxy --network yournetwork ghcr.io/reside-ic/proxy-nginx:latest service example.com 80 443
 docker cp ssl/certificate.pem proxy:/run/proxy/certificate.pem
 docker cp ssl/key.pem proxy:/run/proxy/key.pem
 ```
 
 The `service` here is the name and port of the http server being proxied (e.g., `myapp:8080`), as found on the network `yournetwork` (if using host networking, this could be `localhost:8080` but then you may also be exposing your http service to the wider network, which is probably undesirable).  If your service uses port `80` you may omit the port.
 
+### Building and publishing
+
+GitHub Actions builds and publishes every branch push to `ghcr.io/reside-ic/proxy-nginx`, with
+seven-character SHA and Docker-normalized branch tags. Only `master` publishes
+`latest`.
+
+Build locally with `docker build --pull -t my-local-build .`.
 ## License
 
 MIT © Imperial College of Science, Technology and Medicine
